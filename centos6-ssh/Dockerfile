@@ -1,26 +1,19 @@
 # Bring up sshd
 FROM centos:centos6
-MAINTAINER Evans Ye <innovansye@gmail.com>
 
 # ssh
-RUN yum -y install openssh-server openssh-clients
-RUN sed -i.bak s/UsePAM\ yes/UsePAM\ no/g /etc/ssh/sshd_config
+RUN yum -y install openssh-server openssh-clients sudo
+RUN sed -i.bak s/UsePAM\ yes/UsePAM\ no/ /etc/ssh/sshd_config
+RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key
+RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
+
+# requiretty off
+RUN sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers
 
 # setup vagrant account
-RUN useradd vagrant
-RUN mkdir /home/vagrant/.ssh
-RUN chmod 0700 /home/vagrant/.ssh
-RUN touch /home/vagrant/.ssh/authorized_keys
-RUN curl https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub >> /home/vagrant/.ssh/authorized_keys
-RUN chmod 0600 /home/vagrant/.ssh/authorized_keys
-RUN chown -R vagrant:vagrant /home/vagrant/.ssh
-RUN passwd -d vagrant
-RUN yum -y install sudo
-RUN echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN mkdir /root/.ssh/
+RUN chmod 0755 /root/.ssh
+RUN wget http://github.com/mitchellh/vagrant/raw/master/keys/vagrant.pub --no-check-certificate -O /root/.ssh/authorized_keys
+RUN chmod 0644 /root/.ssh/authorized_keys
 
-# prepare execution script
-RUN touch /sbin/my_init
-RUN echo "#!/bin/bash" >> /sbin/my_init
-RUN echo "service sshd start" >> /sbin/my_init
-RUN echo "/bin/bash" >> /sbin/my_init
-RUN chmod +x /sbin/my_init
+CMD /usr/sbin/sshd -D 
