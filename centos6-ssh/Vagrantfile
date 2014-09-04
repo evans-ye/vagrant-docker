@@ -1,9 +1,12 @@
+ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
+
 Vagrant.configure("2") do |config|
   config.vm.provider "docker" do |d|
     d.build_dir = "./"
     d.create_args = ["-t","-i"]
-    d.cmd = ["/sbin/my_init"]
+    d.build_args = ["-t","centos/ssh:6.5"]
   end
-  #config.ssh.username = "root"
+  config.ssh.username = "root"
+  config.ssh.port = 22
 end
 
