@@ -1,5 +1,5 @@
 # Bring up sshd
-FROM centos:centos6
+FROM bigtop/seed:centos-6.4
 
 # ssh
 RUN yum -y install openssh-server openssh-clients sudo wget
